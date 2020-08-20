@@ -9,7 +9,7 @@ import pandas as pd
 
 class MatchingProcessor(object):
     """MatchingProcessor Class
-        Keyword Matching Using flashtext
+        Keyword Matching Using FlashText
 
     """
 
@@ -124,8 +124,8 @@ class MatchingProcessor(object):
             file_name : string
 
         """
-        self._data.to_csv(os.getcwd() + '/' + file_name, mode=a, header=True)
-        self._logger.info(f'Saved file {file_name} in {os.getcwd()}')
+        self._data.to_csv(os.getcwd() + '/' + file_name, mode='a', header=True)
+        self._logger.info(f'Finished Saving file {file_name} in {os.getcwd()}')
 
     def save_output_database(self, jar_file, db_info):
         """To save DataFrame in Tibero
