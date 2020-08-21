@@ -1,5 +1,6 @@
 from datetime import datetime
 from keywordmatch import MatchingProcessor
+import os
 import pickle
 import pandas as pd
 
@@ -23,4 +24,4 @@ if __name__ == "__main__":
               'output_columns': ['기사제목', '기사내용', '수집시간'],
               'table': 'CRAWLER_DATA',
               'table_columns': ['DETECTED_LINK', 'DETECTED_CONTENTS', 'DETECTED_TIME']}
-    instance.save_output_database(jar_file='/Users/jj/python/coding-test/tibero6-jdbc.jar', db_info=tibero)
+    instance.save_output_database(jar_file=os.getcwd() + '/' + 'tibero6-jdbc.jar', db_info=tibero)
