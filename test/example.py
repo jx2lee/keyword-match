@@ -1,10 +1,13 @@
 from datetime import datetime
-from keywordmatch import MatchingProcessor
 import os
 import pickle
 import pandas as pd
 
 if __name__ == "__main__":
+    import sys
+    sys.path.append('..//')
+    from keywordmatch import MatchingProcessor
+
     with open("example.pickle", "rb") as f:
         test_df = pickle.load(f)
     test_df_keyword = pd.DataFrame({'타입':['금융', '주택', '금융', '주택', '금융', '주택'],
@@ -24,4 +27,4 @@ if __name__ == "__main__":
               'output_columns': ['기사제목', '기사내용', '수집시간'],
               'table': 'CRAWLER_DATA',
               'table_columns': ['DETECTED_LINK', 'DETECTED_CONTENTS', 'DETECTED_TIME']}
-    instance.save_output_database(jar_file=os.getcwd() + '/' + 'tibero6-jdbc.jar', db_info=tibero)
+    instance.save_output_database(jar_file='../' + 'lib/' + 'tibero6-jdbc.jar', db_info=tibero)

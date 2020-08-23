@@ -176,7 +176,11 @@ class MatchingProcessor(object):
             cursor.executemany(insert_query, dump)
         else:
             cursor.execute(insert_query, dump)
-        self._logger.info(f'Finished pushing data.')
+
+        # Count Rows
+        count_query = f'SELECT COUNT(*) FROM {db_info["table"]}'
+        cursor.execute(count_query)
+        self._logger.info(f'Finished pushing data. # of rows: {cursor.fetchall()[0][0]}')
 
         # Disconnect Database
         cursor.close
