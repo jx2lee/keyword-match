@@ -70,7 +70,7 @@ $ mv keywordmatch {your_python_sys_path}
 $ git clone https://github.com/jx2lee/keywordmatch.git
 $ pip install -r requirements.txt
 $ mv keywordmatch {your_python_sys_path}
-$ python example.py # edit connection_info to your DB Setting value.
+$ cd ./test && python example.py # edit connection_info to your DB Setting value.
 ```
 
 # Benchmark
