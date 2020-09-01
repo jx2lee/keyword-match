@@ -20,11 +20,11 @@ if __name__ == "__main__":
     result = instance.is_keyword()
 
     instance._data['수집시간'] = datetime(2020, 8, 19).strftime('%Y-%m-%d')
-    tibero = {'ip': '192.168.179.166',
+    tibero_info = {'ip': '192.168.179.166',
               'port': '8629',
               'sid': 'tibero',
               'id_pw': ['tibero', 'tmax'],
-              'output_columns': ['기사제목', '기사내용', '수집시간'],
+              'output_columns': ['기사제목', '기사내용', '주택', '금융', '수집시간'],
               'table': 'CRAWLER_DATA',
-              'table_columns': ['DETECTED_LINK', 'DETECTED_CONTENTS', 'DETECTED_TIME']}
-    instance.save_output_database(jar_file='../' + 'lib/' + 'tibero6-jdbc.jar', db_info=tibero)
+              'table_columns': ['DETECTED_LINK', 'DETECTED_CONTENTS', 'IS_FINANCE', 'IS_HOUSE', 'DETECTED_TIME']}
+    instance.save_output_database(jar_file='../' + 'lib/' + 'tibero6-jdbc.jar', db_info=tibero_info)

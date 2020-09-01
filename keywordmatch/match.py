@@ -144,8 +144,8 @@ class MatchingProcessor(object):
 
         Examples:
             >>> db = {"ip" : "192.168.179.166", 'sid':'tibero', "id_pw":['tibero', 'tmax'],
-            'output_columns':['기사제목','기사내용','수집시간'], 'table': 'CRAWLER_DATA',
-            'table_columns':['DETECTED_LINK', 'DETECTED_CONTENTS', 'DETECTED_TIME']}
+            >>> 'output_columns':['기사제목','기사내용','수집시간'], 'table': 'CRAWLER_DATA',
+            >>> 'table_columns':['DETECTED_LINK', 'DETECTED_CONTENTS', 'DETECTED_TIME']}
             >>> instance.save_output_database(jar_file='{your_jar_file_path}/tibero6-jdbc.jar', db_info=db)
 
         """
@@ -153,6 +153,10 @@ class MatchingProcessor(object):
         if not os.path.isfile(jar_file):
             raise IOError(f'Invalid file path {jar_file}')
 
+        # Check length table_columns & output_columns
+        assert len(db_info['output_columns']) == len(db_info['table_columns']), f'Set equal length ' \
+                                                                                f'db_info["output_columns"], ' \
+                                                                                f'db_info["table_columns"].'
         # Database Connection
         conn = jaydebeapi.connect('com.tmax.tibero.jdbc.TbDriver',
                                   f'jdbc:tibero:thin:@{db_info["ip"]}:{db_info["port"]}:{db_info["sid"]}',
@@ -170,9 +174,13 @@ class MatchingProcessor(object):
         # Set Cursor and Put dump
         cursor = conn.cursor()
         insert_query = f'INSERT INTO {db_info["table"]} VALUES ({",".join(str("?") for i in range(len(db_info["table_columns"])))})'
-
         self._logger.info(f'Started pushing data. SQL Query: {insert_query}')
-        if len(dump) > 1:
+
+        # Check dump status
+        if not dump:
+            self._logger.warn(f'Empty sql dump. Skip Inserting data to table')
+            return
+        elif len(dump) > 1:
             cursor.executemany(insert_query, dump)
         else:
             cursor.execute(insert_query, dump)
