@@ -24,21 +24,19 @@ class MatchingProcessor(object):
                 List about column what you want to match
 
         """
+
+        # Check Variable type
+        assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class_.__name__}'
+        assert type(input_column) == str, f'You must set input_column is str. Current type is {input_column.__class__.__name__}'
+        assert type(output_columns) == list, f'You must set output_columns is list. Current type is {output_columns.__class__.__name__}'
+        
         self._data = data
         self._input_column = input_column
         self._keyword_dict = {}
         self._keyword_processor = flashtext.KeywordProcessor()
         self._logger = logging.getLogger()
         self._output_columns = output_columns
-
-        # Check Variable type
-        if type(self._data) != pd.DataFrame:
-            raise TypeError(f'You must set data is pd.DataFrame. current type is {type(self._data)}')
-        if type(self._input_column) != str:
-            raise TypeError(f'You must set input_column is str. current type is {type(self._input_column)}')
-        if type(self._output_columns) != list:
-            raise TypeError(f'You must set output_columns is list. current type is {type(self._output_columns)}')
-
+        
     def set_logger(self, logfile_name, is_file=True):
         """To set logger
 
@@ -50,6 +48,11 @@ class MatchingProcessor(object):
                 If you want to get File, Set True
 
         """
+        
+        # Check Variable type
+        assert type(logfile_name) == str, f'You must set logfile_name is string. Current type is {logfile_name.__class__.__name__}'
+        assert type(is_true) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
+
         # Check Logger handler exists
         if len(self._logger.handlers) >= 2:
             return None
@@ -73,8 +76,9 @@ class MatchingProcessor(object):
             self._logger.addHandler(rotating_file_handler)
 
     def add_column(self):
-        """To Add columns for matching keyword
+        """To Add columns for matching keyword. Default new value is 0. (each row)
         """
+
         for col in self._output_columns:
             self._data[col] = 0
         self._logger.info(f'Finished Adding Columns: {self._output_columns}')
@@ -93,6 +97,12 @@ class MatchingProcessor(object):
                 DataFrame Column for Keyword value
 
         """
+
+        # Check Variable type
+        assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class__.__name__}'
+        assert type(key) == str, f'You must set key is str. Current type is {key.__class__.__name__}'
+        assert type(self._output_columns) == list, f'You must set value is list. Current type is {value.__class__.__name__}'
+
         for col in self._output_columns:
             self._keyword_dict[col] = data[data[key] == col][value].to_list()
 
@@ -124,6 +134,11 @@ class MatchingProcessor(object):
             file_name : string
 
         """
+
+        # Check Variable type
+        assert type(file_name) == str, f'You must set key is string. Current type is {file_name.__class__.__name__}'
+
+        # Save to CSV
         self._data.to_csv(os.getcwd() + '/' + file_name, mode='a', header=True)
         self._logger.info(f'Finished Saving file {file_name} in {os.getcwd()}')
 
@@ -154,9 +169,8 @@ class MatchingProcessor(object):
             raise IOError(f'Invalid file path {jar_file}')
 
         # Check length table_columns & output_columns
-        assert len(db_info['output_columns']) == len(db_info['table_columns']), f'Set equal length ' \
-                                                                                f'db_info["output_columns"], ' \
-                                                                                f'db_info["table_columns"].'
+        assert len(db_info['output_columns']) == len(db_info['table_columns']), f'Set equal length (output_colums, table_columns)'
+
         # Database Connection
         conn = jaydebeapi.connect('com.tmax.tibero.jdbc.TbDriver',
                                   f'jdbc:tibero:thin:@{db_info["ip"]}:{db_info["port"]}:{db_info["sid"]}',
