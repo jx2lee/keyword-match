@@ -3,6 +3,7 @@ from tqdm import tqdm
 import flashtext
 import jaydebeapi
 import logging
+import logging.handlers
 import os
 import pandas as pd
 
@@ -51,7 +52,7 @@ class MatchingProcessor(object):
         
         # Check Variable type
         assert type(logfile_name) == str, f'You must set logfile_name is string. Current type is {logfile_name.__class__.__name__}'
-        assert type(is_true) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
+        assert type(is_file) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
 
         # Check Logger handler exists
         if len(self._logger.handlers) >= 2:
