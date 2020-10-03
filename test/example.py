@@ -5,7 +5,6 @@ import pandas as pd
 
 if __name__ == "__main__":
     import sys
-    import os
 
     run_path = os.getcwd()
     sys.path.append(run_path)
