@@ -81,7 +81,7 @@ class MatchingProcessor(object):
         """
 
         for col in self._output_columns:
-            self._data[col] = 0
+            self._data[col] = '0'
         self._logger.info(f'Finished Adding Columns: {self._output_columns}')
 
     def get_keyword_processor(self, data, key, value):
@@ -108,7 +108,7 @@ class MatchingProcessor(object):
             self._keyword_dict[col] = data[data[key] == col][value].to_list()
 
         self._keyword_processor.add_keywords_from_dict(self._keyword_dict)
-        self._logger.info(f'Finished Setting Keyword_processor: {self._keyword_processor.get_all_keywords()}')
+        self._logger.info(f'Finished Setting Keyword_processor')
 
     def is_keyword(self):
         """Match keyword about added column
@@ -124,7 +124,7 @@ class MatchingProcessor(object):
             extract_keywords = set(self._keyword_processor.extract_keywords(text))
             for keyword in self._output_columns:
                 if keyword in extract_keywords:
-                    self._data.at[i, keyword] = 1
+                    self._data.at[i, keyword] = '1'
         self._logger.info(f'Finished Keyword Match.')
         return self._data
 
@@ -184,6 +184,10 @@ class MatchingProcessor(object):
         self._logger.info(f'Started Creating SQL dump.')
         for i in tqdm(self._data.index):
             dump.append(list(self._data.at[i, col] for col in db_info['output_columns']))
+            dump[i][0] = int(dump[i][0])
+            #dump[i][-1] = dump[i][-1].strftime("%Y/%m/%d")
+            #dump[i][-1] = dump[i][-1].strftime("%Y/%m/%d %H:%M:%S")
+
         self._logger.info(f'Finished Creating SQL dump. dump size: {len(dump)}')
 
         # Set Cursor and Put dump
