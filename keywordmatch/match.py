@@ -14,14 +14,14 @@ class MatchingProcessor(object):
 
     """
 
-    def __init__(self, data, input_column, output_columns):
+    def __init__(self, data, input_column, keyword_category):
         """
         Args:
             data : pd.DataFrame
                 DataFrame that you want to match keyword
             input_column : string
                 String about column name of DataFrame
-            output_columns : list
+            keyword_category : list
                 List about column what you want to match
 
         """
@@ -29,14 +29,14 @@ class MatchingProcessor(object):
         # Check Variable type
         assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class_.__name__}'
         assert type(input_column) == str, f'You must set input_column is str. Current type is {input_column.__class__.__name__}'
-        assert type(output_columns) == list, f'You must set output_columns is list. Current type is {output_columns.__class__.__name__}'
+        assert type(keyword_category) == list, f'You must set keyword_category is list. Current type is {keyword_category.__class__.__name__}'
         
         self._data = data
         self._input_column = input_column
         self._keyword_dict = {}
         self._keyword_processor = flashtext.KeywordProcessor()
         self._logger = logging.getLogger()
-        self._output_columns = output_columns
+        self._keyword_categroy = keyword_category
         
     def set_logger(self, logfile_name, is_file=True):
         """To set logger
@@ -78,11 +78,12 @@ class MatchingProcessor(object):
 
     def add_column(self):
         """To Add columns for matching keyword. Default new value is 0. (each row)
+
         """
 
-        for col in self._output_columns:
+        for col in self._keyword_categroy:
             self._data[col] = '0'
-        self._logger.info(f'Finished Adding Columns: {self._output_columns}')
+        self._logger.info(f'Finished Adding Columns: {self._keyword_categroy}')
 
     def get_keyword_processor(self, data, key, value):
         """To get keyword_processor using FlashText
@@ -102,9 +103,9 @@ class MatchingProcessor(object):
         # Check Variable type
         assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class__.__name__}'
         assert type(key) == str, f'You must set key is str. Current type is {key.__class__.__name__}'
-        assert type(self._output_columns) == list, f'You must set value is list. Current type is {value.__class__.__name__}'
+        assert type(value) == str, f'You must set value is str. Current type is {value.__class__.__name__}'
 
-        for col in self._output_columns:
+        for col in self._keyword_categroy:
             self._keyword_dict[col] = data[data[key] == col][value].to_list()
 
         self._keyword_processor.add_keywords_from_dict(self._keyword_dict)
@@ -122,7 +123,7 @@ class MatchingProcessor(object):
         for i in tqdm(self._data.index):
             text = self._data.at[i, self._input_column]
             extract_keywords = set(self._keyword_processor.extract_keywords(text))
-            for keyword in self._output_columns:
+            for keyword in self._keyword_categroy:
                 if keyword in extract_keywords:
                     self._data.at[i, keyword] = '1'
         self._logger.info(f'Finished Keyword Match.')
@@ -179,22 +180,22 @@ class MatchingProcessor(object):
                                   jar_file)
         self._logger.info(f'Connected Tibero: {db_info["ip"]}:{db_info["port"]}:{db_info["sid"]}')
 
-        # Create data dump during Loop & alter sql qeury
+        # Create data dump during Loop & SQL qeury
+        self._logger.info(f'Creating SQL dump.')
         dump = []
-        self._logger.info(f'Started Creating SQL dump.')
-        for i in tqdm(self._data.index):
-            dump.append(list(self._data.at[i, col] for col in db_info['output_columns']))
-            dump[i][0] = int(dump[i][0])
-        alter_query = """ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY/MM/DD HH24:MI:SS'"""
+        np_type_list = (numpy.int8, numpy.int16, numpy.int32, numpy.int64)
+        for i in self._data.index:
+            dump.append(list(self._data.at[i, col] if type(self._data.at[i, col]) not in np_type_list else int(self._data.at[i, col]) for col in db_info['output_columns']))
+
+        alter_query = f'ALTER SESSION SET NLS_DATE_FORMAT = \'YYYY/MM/DD HH24:MI:SS\''
+        insert_query = f'INSERT INTO {db_info["table"]} VALUES ({",".join(str("?") for i in range(len(db_info["table_columns"])))})'
+        count_query = f'SELECT COUNT(*) FROM {db_info["table"]}'
+
         self._logger.info(f'Finished Creating SQL dump. dump size: {len(dump)}')
-        self._logger.info(f'Finished alter SQL query. {alter_query}')
+        self._logger.info(f'Finished Creating SQL query. alter_query:{alter_query}, insert_query:{insert_query}')
 
         # Set Cursor and Put dump
         cursor = conn.cursor()
-        insert_query = f'INSERT INTO {db_info["table"]} VALUES ({",".join(str("?") for i in range(len(db_info["table_columns"])))})'
-        self._logger.info(f'Started pushing data. SQL Query: {insert_query}')
-
-        # Check dump status
         if not dump:
             self._logger.warn(f'Empty sql dump. Skip Inserting data to table')
             return
@@ -206,7 +207,6 @@ class MatchingProcessor(object):
             cursor.execute(insert_query, dump)
 
         # Count Rows
-        count_query = f'SELECT COUNT(*) FROM {db_info["table"]}'
         cursor.execute(count_query)
         self._logger.info(f'Finished pushing data. # of rows: {cursor.fetchall()[0][0]}')
 
