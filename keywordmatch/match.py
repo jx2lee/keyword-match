@@ -179,16 +179,15 @@ class MatchingProcessor(object):
                                   jar_file)
         self._logger.info(f'Connected Tibero: {db_info["ip"]}:{db_info["port"]}:{db_info["sid"]}')
 
-        # Create cursor and insert data during Loop
+        # Create data dump during Loop & alter sql qeury
         dump = []
         self._logger.info(f'Started Creating SQL dump.')
         for i in tqdm(self._data.index):
             dump.append(list(self._data.at[i, col] for col in db_info['output_columns']))
             dump[i][0] = int(dump[i][0])
-            #dump[i][-1] = dump[i][-1].strftime("%Y/%m/%d")
-            #dump[i][-1] = dump[i][-1].strftime("%Y/%m/%d %H:%M:%S")
-
+        alter_query = """ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY/MM/DD HH24:MI:SS'"""
         self._logger.info(f'Finished Creating SQL dump. dump size: {len(dump)}')
+        self._logger.info(f'Finished alter SQL query. {alter_query}')
 
         # Set Cursor and Put dump
         cursor = conn.cursor()
@@ -200,8 +199,10 @@ class MatchingProcessor(object):
             self._logger.warn(f'Empty sql dump. Skip Inserting data to table')
             return
         elif len(dump) > 1:
+            cursor.execute(alter_query)
             cursor.executemany(insert_query, dump)
         else:
+            cursor.execute(alter_query)
             cursor.execute(insert_query, dump)
 
         # Count Rows
@@ -210,6 +211,6 @@ class MatchingProcessor(object):
         self._logger.info(f'Finished pushing data. # of rows: {cursor.fetchall()[0][0]}')
 
         # Disconnect Database
-        cursor.close
-        conn.close
+        conn.commit()
+        conn.close()
         self._logger.info(f'Disconnected Tibero.')
