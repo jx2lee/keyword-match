@@ -4,6 +4,7 @@ import flashtext
 import jaydebeapi
 import logging
 import logging.handlers
+import numpy
 import os
 import pandas as pd
 
