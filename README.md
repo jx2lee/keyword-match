@@ -12,7 +12,7 @@ $ mv keywordmatch {your_python_sys_path}
 ***Set Logger***  
 ```python
 >>> from keywordmatch import MatchingProcessor
->>> match_processor = MatchingProcessor(data=df, input_column='기사내용', ouput_columns=['주택', '금융'])
+>>> match_processor = MatchingProcessor(data=df, input_column='기사내용', keyword_category=['주택', '금융'])
 >>> match_processor.set_logger(logfile_name='test', is_file=True) # if is_file is False, Don't save log file.
 ```  
 
