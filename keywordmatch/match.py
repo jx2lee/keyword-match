@@ -128,7 +128,7 @@ class MatchingProcessor(object):
                 if keyword in extract_keywords:
                     self._data.at[i, keyword] = '1'
         self._logger.info(f'Finished Keyword Match.')
-        return self._data
+        return
 
     def save_output_file(self, file_name):
         """To save DataFrame as file
