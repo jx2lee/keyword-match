@@ -1,4 +1,5 @@
-from datetime import datetime
+
+m datetime import datetime
 from tqdm import tqdm
 import flashtext
 import jaydebeapi
@@ -31,14 +32,13 @@ class MatchingProcessor(object):
         assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class_.__name__}'
         assert type(input_column) == str, f'You must set input_column is str. Current type is {input_column.__class__.__name__}'
         assert type(keyword_category) == list, f'You must set keyword_category is list. Current type is {keyword_category.__class__.__name__}'
-        
+
         self._data = data
         self._input_column = input_column
         self._keyword_dict = {}
         self._keyword_processor = flashtext.KeywordProcessor()
-        self._logger = logging.getLogger()
         self._keyword_categroy = keyword_category
-        
+
     def set_logger(self, logfile_name, is_file=True):
         """To set logger
 
@@ -50,14 +50,17 @@ class MatchingProcessor(object):
                 If you want to get File, Set True
 
         """
-        
+
+        self._logger = logging.getLogger(__name__)
+        self._logger.propagate = False
+
         # Check Variable type
         assert type(logfile_name) == str, f'You must set logfile_name is string. Current type is {logfile_name.__class__.__name__}'
         assert type(is_file) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
 
         # Check Logger handler exists
         if len(self._logger.handlers) >= 2:
-            return None
+            self._logger.handlers.clear()
 
         self._logger.setLevel(logging.INFO)
         formatter = logging.Formatter("[%(asctime)s][%(levelname)s] %(message)s")
