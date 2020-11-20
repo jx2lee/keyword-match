@@ -1,5 +1,4 @@
-
-m datetime import datetime
+from datetime import datetime
 from tqdm import tqdm
 import flashtext
 import jaydebeapi
@@ -10,13 +9,46 @@ import os
 import pandas as pd
 
 
+def _set_log(has_file = False):
+
+    logger = logging.getLogger('keywordmatch')
+    logger.propagate = False
+
+    # Check Variable type
+    assert type(has_file) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
+
+    # Check Logger handler exists
+    if len(logger.handlers) >= 2:
+        logger.handlers.clear()
+
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("[%(asctime)s][%(levelname)s] %(message)s")
+    file_max_bytes = 10 * 1024 * 1024
+
+    # set StreamHandler
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+
+    # set RotatingFileHandler
+    if has_file:
+        rotating_file_handler = logging.handlers.RotatingFileHandler(
+            filename=os.getcwd() + "/" + logfile_name + ".log",
+            maxBytes=file_max_bytes,
+            backupCount=2)
+        rotating_file_handler.setFormatter(formatter)
+        logger.addHandler(rotating_file_handler)
+
+    return logger
+
+
 class MatchingProcessor(object):
     """MatchingProcessor Class
         Keyword Matching Using FlashText
 
     """
 
-    def __init__(self, data, input_column, keyword_category):
+    def __init__(self, data, input_column, keyword_category, has_log_file = False):
         """
         Args:
             data : pd.DataFrame
@@ -38,47 +70,7 @@ class MatchingProcessor(object):
         self._keyword_dict = {}
         self._keyword_processor = flashtext.KeywordProcessor()
         self._keyword_categroy = keyword_category
-
-    def set_logger(self, logfile_name, is_file=True):
-        """To set logger
-
-        Args:
-            logfile_name : string
-                word that you want to set logfile name
-
-            is_file : bool
-                If you want to get File, Set True
-
-        """
-
-        self._logger = logging.getLogger(__name__)
-        self._logger.propagate = False
-
-        # Check Variable type
-        assert type(logfile_name) == str, f'You must set logfile_name is string. Current type is {logfile_name.__class__.__name__}'
-        assert type(is_file) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
-
-        # Check Logger handler exists
-        if len(self._logger.handlers) >= 2:
-            self._logger.handlers.clear()
-
-        self._logger.setLevel(logging.INFO)
-        formatter = logging.Formatter("[%(asctime)s][%(levelname)s] %(message)s")
-        file_max_bytes = 10 * 1024 * 1024
-
-        # set StreamHandler
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(formatter)
-        self._logger.addHandler(stream_handler)
-
-        # set RotatingFileHandler
-        if is_file:
-            rotating_file_handler = logging.handlers.RotatingFileHandler(
-                filename=os.getcwd() + "/" + logfile_name + ".log",
-                maxBytes=file_max_bytes,
-                backupCount=2)
-            rotating_file_handler.setFormatter(formatter)
-            self._logger.addHandler(rotating_file_handler)
+        self._logger = _set_log(has_file = has_log_file)
 
     def add_column(self):
         """To Add columns for matching keyword. Default new value is 0. (each row)
