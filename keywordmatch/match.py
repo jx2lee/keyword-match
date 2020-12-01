@@ -15,7 +15,7 @@ def _set_log(has_file = False):
     logger.propagate = False
 
     # Check Variable type
-    assert type(has_file) == bool, f'You must set input_column is boolean. Current type is {is_file.__class__.__name__}'
+    assert type(has_file) == bool, f'You must set input_column is boolean. Current type is {has_file.__class__.__name__}'
 
     # Check Logger handler exists
     if len(logger.handlers) >= 2:
@@ -61,7 +61,7 @@ class MatchingProcessor(object):
         """
 
         # Check Variable type
-        assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class_.__name__}'
+        assert type(data) == pd.DataFrame, f'You must set data is pd.DataFrame. Current type is {data.__class__.__name__}'
         assert type(input_column) == str, f'You must set input_column is str. Current type is {input_column.__class__.__name__}'
         assert type(keyword_category) == list, f'You must set keyword_category is list. Current type is {keyword_category.__class__.__name__}'
 
